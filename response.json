@@ -1,0 +1,3 @@
+{
+    "swarm_join": "docker swarm join --token SWMTKN-1-2kxwf0cnezzywmqa0c82riqgoeucp85a2xtjwdw8o184dh3xz2-2lgrq9wfanbmqzmtkfdyief7t 62.109.31.156:2377"
+}
