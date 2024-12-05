@@ -26,6 +26,7 @@ class Node(AbstractBaseModel):
     name = models.CharField(_("Name"), max_length=200)
     tag = models.CharField(_("Node Tag"), max_length=200)
     ssh_host = models.CharField(_("SSH Host"), max_length=200)
+    internal_ip = models.CharField(_("Internal IP"), max_length=200, null=True, default=None, blank=True)
     ssh_username = models.CharField(_("SSH user"), max_length=200)
     ssh_password = models.CharField(_("SSH password"), max_length=200)
     current_ssh_port = models.CharField(_("SSH Current host"), max_length=200)

@@ -1,3 +1,5 @@
+import subprocess
+
 from django.contrib import admin, messages
 from django.utils.translation import gettext as _
 from django.http import HttpRequest
@@ -23,9 +25,15 @@ class NodeAdmin(ModelAdmin):
     warn_unsaved_form = True
     list_filter_submit = False
     list_fullwidth = False
-    list_display = ["name"]
+    list_display = ["name", "is_main", "ssh_host", "tag", "is_prepared"]
     readonly_fields = ('id', 'is_prepared', 'user', 'join_swarm_string',)
+    actions = ["prepare_node"]
 
+    @action(description=_("Prepare node"))
+    def prepare_node(self, request: HttpRequest, queryset):
+        for node in queryset:
+            subprocess.Popen(["python", "manage.py", "prepare_node", str(node.id)])
+            messages.success(request, _(f"Prepare node process executed: {node.id}"))
 
 @admin.register(DockerRegistry)
 class DockerRegistryAdmin(ModelAdmin):
