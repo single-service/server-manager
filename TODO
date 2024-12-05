@@ -4,6 +4,7 @@ Add portainer for counturs
 Add stack create docker-compose.yml
 Add deploy stack
 Add domain configurator
+Encrypt passwords with cryptogrh
 
 Add gitrepo
 Add CICD operations
