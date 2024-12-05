@@ -1,0 +1,12 @@
+Add server configurator
+Add stack create docker-compose.yml
+Add deploy stack
+Add domain configurator
+
+Add gitrepo
+Add CICD operations
+
+Translator
+CICD Build and deploy new version
+Move to docker check
+Add docker-compose
