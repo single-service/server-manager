@@ -1,3 +1,4 @@
+Base tasks:
 + Add server configurator for main
 Add server configurator for not main
 Add portainer for counturs
@@ -5,11 +6,20 @@ Add stack create docker-compose.yml
 Add deploy stack
 Add domain configurator
 Encrypt passwords with cryptogrh
-
 Add gitrepo
 Add CICD operations
-
 Translator
 CICD Build and deploy new version
 Move to docker check
 Add docker-compose
+
+Improove tasks:
+Add schema for contours
+Add node schema
+Add logs for service
+Add sh for service
+Add auto CICD
+
+Comercial tasks:
+Buy domain
+Buy server
