@@ -1,4 +1,6 @@
-Add server configurator
++ Add server configurator for main
+Add server configurator for not main
+Add portainer for counturs
 Add stack create docker-compose.yml
 Add deploy stack
 Add domain configurator
