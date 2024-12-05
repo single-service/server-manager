@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY", 'django-insecure-zq##4xr=m6rc+k*x6sck#1%_e!3#_=)0-n^9witrm^f$0d6*rc')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(int(os.environ.get("DEBUG", default=0)))
+DEBUG = bool(int(os.environ.get("DEBUG", default=1)))
 DEFAULT_ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
 CSRF_TRUSTED_ORIGINS = [
     "http://0.0.0.0:8009",
@@ -166,9 +166,9 @@ UNFOLD = {
     "SITE_TITLE": _("Server Manager"),
     "SITE_HEADER": _("Server Manager"),
     "LOGIN": {
-        "image": lambda request: static("manager/img/eb2e92ee45ba62cdcca3f12772ceb6a4.jpg"),
+        "image": lambda request: static("assets/layout.jpg"),
     },
-    "SITE_SYMBOL": "database",
+    "SITE_SYMBOL": "computer",
     "SITE_FAVICONS": [
         {
             "rel": "icon",

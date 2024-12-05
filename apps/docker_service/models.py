@@ -2,7 +2,7 @@ from django.db import models
 from django.utils.translation import gettext as _
 
 from generic.models import AbstractBaseModel
-from .choices import StackTypeChoices, RestartPolicyChoices
+from .choices import StackTypeChoices, RestartPolicyChoices, ProtocolTypesChoices
 
 
 class Contour(AbstractBaseModel):
@@ -66,11 +66,11 @@ class Container(AbstractBaseModel):
     name = models.CharField(_("Name"), max_length=200)
     image = models.CharField(_("Image"), max_length=300)
 
-    healthcheck_command = models.TextField(_("Healthcheck Command"))
-    interval = models.PositiveIntegerField(_("Healthcheck Interval"))
-    timeout = models.PositiveIntegerField(_("Healthcheck Timeout"))
-    retries = models.PositiveIntegerField(_("Healthcheck Retries"))
-    start_period = models.PositiveIntegerField(_("Healthcheck Start period"))
+    healthcheck_command = models.TextField(_("Healthcheck Command"), null=True, blank=True)
+    interval = models.PositiveIntegerField(_("Healthcheck Interval"), null=True, blank=True)
+    timeout = models.PositiveIntegerField(_("Healthcheck Timeout"), null=True, blank=True)
+    retries = models.PositiveIntegerField(_("Healthcheck Retries"), null=True, blank=True)
+    start_period = models.PositiveIntegerField(_("Healthcheck Start period"), null=True, blank=True)
 
     restart_policy = models.IntegerField(
         _("Restart Policy"),
@@ -96,11 +96,11 @@ class Service(AbstractBaseModel):
     stack = models.ForeignKey("docker_service.Service", on_delete=models.CASCADE)
     container = models.ForeignKey("docker_service.Container", on_delete=models.CASCADE)
 
-    healthcheck_command = models.TextField(_("Healthcheck Command"))
-    interval = models.PositiveIntegerField(_("Healthcheck Interval"))
-    timeout = models.PositiveIntegerField(_("Healthcheck Timeout"))
-    retries = models.PositiveIntegerField(_("Healthcheck Retries"))
-    start_period = models.PositiveIntegerField(_("Healthcheck Start period"))
+    healthcheck_command = models.TextField(_("Healthcheck Command"), null=True, blank=True)
+    interval = models.PositiveIntegerField(_("Healthcheck Interval"), null=True, blank=True)
+    timeout = models.PositiveIntegerField(_("Healthcheck Timeout"), null=True, blank=True)
+    retries = models.PositiveIntegerField(_("Healthcheck Retries"), null=True, blank=True)
+    start_period = models.PositiveIntegerField(_("Healthcheck Start period"), null=True, blank=True)
 
     restart_policy = models.IntegerField(
         _("Restart Policy"),
@@ -150,6 +150,7 @@ class DockerRegistry(AbstractBaseModel):
     port = models.CharField(_("Port"), max_length=200)
     username = models.CharField(_("Username"), max_length=200)
     password = models.CharField(_("Password"), max_length=200)
+    protocol = models.CharField(_("Protocol type"), max_length=20, choices=ProtocolTypesChoices.choices, default=ProtocolTypesChoices.HTTP)
 
     def __str__(self):
         return self.name
