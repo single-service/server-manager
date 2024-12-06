@@ -1,0 +1,45 @@
+version: '3.3'
+
+volumes:
+  static_volume:
+  media_volume:
+  db_volume:
+  portainer_volume:
+
+services:
+  admin:
+    build:
+      context: .
+      dockerfile: ./compose/admin/Dockerfile
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - media_volume:/server_manager/media
+      - static_volume:/server_manager/static
+    ports:
+      - "81:80"
+    env_file:
+      - .envs/.admin
+      - .envs/.postgres
+    restart: on-failure
+
+  db:
+    image: bitnami/postgresql:15.8.0
+    volumes:
+      - db_volume:/bitnami/postgresql
+    env_file:
+      - .envs/.postgres
+    ports:
+      - "5432:5432"
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    ports:
+      - "9002:9000"
+      - "8000:8000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_volume:/data
+    command: -H unix:///var/run/docker.sock
+    environment:
+      - ADMIN_USER=admin  # Замените на желаемое имя пользователя
+      - ADMIN_PASSWORD=admin  # Замените на желаемый пароль

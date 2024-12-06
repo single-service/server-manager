@@ -5,6 +5,7 @@ from django.utils.translation import gettext as _
 from django.http import HttpRequest
 
 import docker
+import requests
 from unfold.admin import ModelAdmin
 from unfold.decorators import action
 
@@ -73,10 +74,12 @@ class ContainerAdmin(ModelAdmin):
         for container in queryset:
             try:
                 # Проверяем наличие образа в реестре
-                client.images.get(container.image)
-                messages.success(request, f"Image {container.image} exists.")
-            except docker.errors.ImageNotFound:
-                messages.error(request, f"Image {container.image} does not exist.")
+                response = requests.get(f"https://registry.hub.docker.com/v2/repositories/{container.image}/tags")
+                if response.status_code == 200:
+                    messages.success(request, f"Image {container.image} exists.")
+                else:
+                    print(response.text)
+                    messages.error(request, f"Image {container.image} does not exist.")
             except Exception as e:
                 messages.error(request, f"Connection failed for {container.name}: {str(e)}")
 
