@@ -29,7 +29,7 @@ services:
     env_file:
       - .envs/.postgres
     ports:
-      - "5432:5432"
+      - "5434:5432"
 
   portainer:
     image: portainer/portainer-ce:latest

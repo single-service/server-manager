@@ -1,4 +1,10 @@
+import socket
+import time
+
+from django.conf import settings
+
 import paramiko
+import requests
 
 from docker_service.models import Node
 
@@ -32,11 +38,14 @@ class NodeProcessor:
                 pass
             self._set_node_tag(client, self.node.tag)
             self._add_my_sshkey2authorized_keys(client, self.node.ssh_public_key)
-            self._add_node_exporter(client)
+            # self._add_node_exporter(client)
+            self._manage_server_directories_and_services(client)
             if self.node.current_ssh_port != self.node.new_ssh_port:
                 self._change_ssh_port(client, self.node.current_ssh_port, self.node.new_ssh_port)
                 self.node.current_ssh_port = self.node.new_ssh_port
                 self.node.save()
+            if self.node.is_main:
+                self._add_node2_portainer(client)
         except Exception as e:
             return False, str(e)
         finally:
@@ -182,3 +191,89 @@ class NodeProcessor:
         print("stdout:", stdout.read().decode())
         print("stderr:", stderr.read().decode())
         print("Node Exporter запущен.")
+
+    def _manage_server_directories_and_services(self, ssh_client: paramiko.SSHClient):
+        # 1) Проверка существования папки /apps
+        stdin, stdout, stderr = ssh_client.exec_command('if [ ! -d /apps ]; then mkdir /apps; fi')
+        
+        # 2) Проверка существования папки /apps/metrics_services
+        stdin, stdout, stderr = ssh_client.exec_command('if [ ! -d /apps/metrics_services ]; then mkdir /apps/metrics_services; fi')
+        
+        # 3). Проверка наличия docker-compose.yml и копирование, если его нет
+        remote_file_path = '/apps/metrics_services/docker-compose.yml'
+        local_file_path = f"{settings.BASE_DIR}/docker_service/data/docker-compose.yml"
+        sftp = ssh_client.open_sftp()
+        try:
+            sftp.stat(remote_file_path)
+        except FileNotFoundError:
+            sftp.put(local_file_path, remote_file_path)
+        
+        # 4) Проверка, поднят ли стэк в docker swarm - metrics_service
+        stdin, stdout, stderr = ssh_client.exec_command('docker stack ls | grep metrics_service || docker stack deploy -c /apps/metrics_services/docker-compose.yml metrics_service')
+        print("Execute metrics stack out: ", stdout.read().decode())
+        print("Execute metrics stack error: ", stderr.read().decode())
+
+    # Всякие функции
+    def _ping_port(self, host, port, timeout=180):
+        """Проверяет доступность порта на хосте."""
+        end_time = time.time() + timeout
+        while time.time() < end_time:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.settimeout(1)
+                result = sock.connect_ex((host, port))
+                if result == 0:
+                    return True
+            time.sleep(1)
+        return False
+    
+    def _get_portainer_token(self):
+        """Получает токен авторизации для Portainer."""
+        response = requests.post(f"{settings.PORTAINER_URL}/api/auth",
+                                 json={"username": settings.PORTAINER_USERNAME, "password": settings.PORTAINER_PASSWORD})
+        if response.status_code == 200:
+            return response.json().get("jwt")
+        else:
+            raise Exception("Ошибка авторизации в Portainer: " + response.text)
+
+    def _check_environment_exists(self, token, environment_name):
+        """Проверяет наличие окружения в Portainer."""
+        headers = {"Authorization": f"Bearer {token}"}
+        response = requests.get(f"{settings.PORTAINER_URL}/api/endpoints", headers=headers)
+        if response.status_code == 200:
+            environments = response.json()
+            for env in environments:
+                if env["Name"] == environment_name:
+                    return True
+        return False
+
+    def _create_environment(self, token, environment_name):
+        """Создает новое окружение в Portainer."""
+        headers = {"Authorization": f"Bearer {token}"}
+        data = {
+            "Name": environment_name,
+            "EndpointCreationType": 2,
+            "URL": f"{self.node.ssh_host}:9001"
+            # Добавьте другие параметры окружения, если необходимо
+        }
+        response = requests.post(f"{settings.PORTAINER_URL}/api/endpoints", headers=headers, json=data)
+        if response.status_code != 201:
+            raise Exception("Ошибка создания окружения в Portainer: " + response.text)
+
+    def _add_node2_portainer(self, ssh_client):
+        port = 9001
+        # Шаг 1: Пинг до порта 9001
+        if not self._ping_port(self.node.ssh_host, port):
+            raise Exception("Ошибка: порт 9001 недоступен")
+        # Шаг 2: Авторизация в Portainer
+        print("Portainer Agent is Ready")
+        token = self._get_portainer_token()
+        print("Portainer token accepted")
+        # Шаг 3: Проверка существования окружения
+        environment_name = str(self.node.id)
+        if not self._check_environment_exists(token, environment_name):
+            print("Окружения пока нет")
+            # Шаг 4: Если окружение не существует, создаем его
+            self._create_environment(token, environment_name)
+            print("Окружение создано")
+        else:
+            print("Окружение уже существует")

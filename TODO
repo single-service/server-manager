@@ -1,5 +1,7 @@
 Base tasks:
-+ Add server configurator for main
+Add server configurator for main
+ - Add docker-compose with portainer agent and node exporter
+ - Add node to environment portainer
 Add server configurator for not main
 Add portainer for counturs
 Add stack create docker-compose.yml
@@ -10,8 +12,8 @@ Add gitrepo
 Add CICD operations
 Translator
 CICD Build and deploy new version
-Move to docker check
-Add docker-compose
++Move to docker check
++Add docker-compose
 
 Improove tasks:
 Add schema for contours
@@ -23,3 +25,7 @@ Add auto CICD
 Comercial tasks:
 Buy domain
 Buy server
+Buy registry
+Buy gitrepo
+Buy smtp server
+Subscription for service

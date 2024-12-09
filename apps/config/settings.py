@@ -182,3 +182,8 @@ UNFOLD = {
         },
     ],
 }
+
+
+PORTAINER_URL = os.getenv("PORTAINER_URL", "http://portainer:9000")
+PORTAINER_USERNAME = os.getenv("PORTAINER_USERNAME")
+PORTAINER_PASSWORD = os.getenv("PORTAINER_PASSWORD")
